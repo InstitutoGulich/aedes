@@ -1,0 +1,4 @@
+netCDF4==1.6.5
+numpy==1.24.4
+pygrib==2.1.5
+urllib3==2.2.1

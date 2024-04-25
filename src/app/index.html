@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" value="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/bootstrap-datepicker3.css"/>
+    <link rel="stylesheet" href="css/app.css" />
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="js/plotly.min.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+
+    <style>
+      .grid-container {
+        display: grid;
+        grid-template-columns: 66% 33%;
+      }
+      .full-container {
+        width:1400px;
+        margin:auto;
+      }
+      .button {
+        background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+      .button1 {
+        border-radius: 12px;
+      }
+      .disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #f44336;
+      }
+    </style>
+  </head>
+
+
+<body>
+  <div class="full-container">
+    <div class="alert alert-danger alert-dismissable fade in" style="display: none">
+      <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+      <span id="message"></span>
+    </div>
+    <div class="grid-container">
+      <div>
+        <h2 style="text-align: center">Modelado de la población de Aedes aegypti</h2>
+        <p style="text-align: center" >ref: <a href="https://www.sciencedirect.com/science/article/abs/pii/S1574954121001424" target="_blank">Implementation of a proactive system to monitor Aedes aegypti populations using open access historical and forecasted meteorological data</a></p>
+      </div>
+      <div style="text-align: center;">
+        <img src="logos.png" alt="Instituto de Altos Estudios Espaciales 'Mario Gulich'" style="height:60px;"></i> <!-- Replace 'icon-class' with the class of the icon you want to use -->
+      </div>  
+    </div>
+    <hr style="width:100%;text-align:left;margin-left:0">
+    <div id="container">
+      <div id="controls" class="panel panel-default">
+        <div class="panel-body">
+          <form>
+            <div class="form-group">
+              <label for="dates">Fechas</label>
+              <div>
+                <input type="text" autocomplete="off" name="start_date" id="start_date" class="form-control date" value="" />
+                <input type="text" autocomplete="off" name="end_date" id="end_date" class="form-control date" value="" />
+                <select name="location" id="location" class="form-control">
+                  <option value="cordoba">Córdoba</option>
+                  <option value="jesus_maria">Jesus María</option>
+                  <option value="la_para">La Para</option>
+                  <option value="marcos_juarez">Marcos Juarez</option>
+                  <option value="rio_cuarto">Río Cuarto</option>
+                  <option value="salsipuedes">Salsipuedes</option>
+                  <option value="san_francisco">San Francisco</option>
+                  <option value="villa_maria">Villa María</option>
+                  <option value="tartagal">Tartagal</option>
+                  <option value="oran">Oràn</option>
+                  <option value="ingeniero_juarez">Ingeniero Juarez</option>
+                  <option value="puerto_iguazu">Puerto Iguazú</option>
+                  <option value="santa_fe">Santa Fe</option>
+                </select>
+                <select name="scenario" id="scenario" class="form-control">
+                  <option value="rc">Condiciones regulares</option>
+                  <option value="it">Temperatura aumentada(20%)</option>
+                  <option value="dt">Temperatura disminuida(-20%)</option>
+                  <option value="ip">Precipitación aumentada(20%)</option>
+                  <option value="dp">Precipitación disminuida(-20%)</option>
+                </select>
+              </div>
+            </div>
+            <button id="runSimulation" class="btn btn-primary">Correr Simulación</button>
+          </form>
+        </div>
+      </div>
+      <div id="weather"></div>
+      <div id="population"></div>
+      <div id="population_II"></div>
+      <div id="donwload">
+        <button class="button button1 disabled">donwload</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

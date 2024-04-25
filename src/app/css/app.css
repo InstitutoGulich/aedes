@@ -1,0 +1,64 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#controls {
+  grid-area: header-left;
+}
+
+#weather {
+  grid-area: header-right;
+}
+
+#population {
+  grid-area: main;
+}
+
+#population_II {
+  grid-area: main_II;
+}
+
+#container {
+  display: grid;
+  grid-template-columns: 20% 80%;
+  grid-template-areas:
+    "header-left header-right"
+    "main main"
+    "main_II main_II"
+    "footer footer";
+}
+
+#download {
+  grid-area: footer;
+}
+
+#container > div{
+  margin-right: 20px;
+  margin-bottom: 40px;
+}
+
+/*Disable spinners */
+/* For Firefox */
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+/* Webkit browsers like Safari and Chrome */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+a, a:visited {
+  color: #357EBD;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  color: #3071A9;
+  text-decoration: none;
+  cursor: pointer;
+}

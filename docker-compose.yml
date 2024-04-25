@@ -1,0 +1,35 @@
+version: '3.0'
+services:
+  cron:
+    build: 
+      context: .
+      dockerfile: cron/Dockerfile
+      args:
+        MINUTE: "*"
+        HOUR: "*"
+        DAY_OF_MONTH: "*"
+        MONTH: "*"
+        DAY_OF_WEEK: "*"
+        COMMAND: "echo Hello world"
+    restart: always
+    image: dengue_cron
+    container_name: dengue_cron
+    volumes:
+      - data:/root/data
+  web:
+    build:
+        context: .
+        dockerfile: web/Dockerfile
+    container_name: dengue_web
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - data:/root/data
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./data
