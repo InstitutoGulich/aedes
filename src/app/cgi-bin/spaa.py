@@ -70,8 +70,19 @@ def runSimulation(GET):
     T=[ [ daysSinceEpoch(start_datetime,t), float(weather.T(t)) - 273.15 ] for t in time_range]
     RH=[ [ daysSinceEpoch(start_datetime,t), float(weather.RH(t)) ] for t in time_range]
 
+
+    date = [(start_datetime + datetime.timedelta(days=t)) for t in time_range]
+    location_name = location.split(".")[0]
+    filename = f"outputs/{location_name}.csv"
+    with open("src/app/"+filename,"w") as fout:
+        fout.write(f"date, egg, larvae, adult1+adult2, oviposition, precipitations, temperature, rh\n")
+        for dd,a,b,c,d,e,f,g in zip(date,E,L,A,O,p,T,RH):
+            fout.write(f"{dd}, {a[1]:.9e}, {b[1]:.9e}, {c[1]:.9e}, {d[1]:.9e}, {e[1]:.9e}, {f[1]:.9e}, {g[1]:.9e}\n")
+    
+
     return json.dumps({
                         'population':[{'name':'Huevos','data':E,'type':'scatter'},{'name':'Oviposicion','data':O,'type':'scatter'}],
                         'population_II':[{'name':'Larvas','data':L,'type':'scatter'},{'name':'Adultos','data':A,'type':'scatter'}],
-                        'weather':[{'name':'Temperatura','data':T,'type':'scatter'},{'name':'Humedad Relativa','data':RH,'type':'scatter'},{'name':'Precipitacion','data':p,'type':'bar'}]
+                        'weather':[{'name':'Temperatura','data':T,'type':'scatter'},{'name':'Humedad Relativa','data':RH,'type':'scatter'},{'name':'Precipitacion','data':p,'type':'bar'}],
+                        'filename':filename
                         })

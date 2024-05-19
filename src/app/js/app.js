@@ -43,7 +43,9 @@ $(document).ready(function() {
         app.draw_chart('population',data.population);
         app.draw_chart('weather',data.weather);
         app.draw_chart('population_II',data.population_II);
-        $('#download').attr('href','cgi-bin/iface.py?method=download&filename='+data.filename);
+        console.log(data.filename);
+        $('#download_button').removeClass('disabled').addClass('enable');
+        $('#ref').attr('href',data.filename);
       },
       error:function(data){
         $('.alert #message').html('Error inesperado.'+data.responseText.substring(0,500));
