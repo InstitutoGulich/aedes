@@ -26,10 +26,8 @@ RUN cp pybind11/include/pybind11 /usr/include/  -r
 RUN git clone https://gitlab.com/libeigen/eigen.git
 RUN cp eigen/Eigen /usr/include/  -r
 
-COPY src/ src/
 COPY resources/ resources/
-#COPY data/ data/
-
+COPY src/ src/
 RUN g++ -std=c++17 -Wall -O3 -march=native -shared -fPIC -I/usr/include/python3.8 src/cpp/otero_precipitation_wrapper.cpp -o src/otero_precipitation_wrapper.so
 
 RUN a2enmod cgid
@@ -42,6 +40,10 @@ RUN a2enconf cgi-enabled
 RUN sed -i.bak 's/#AddDefaultCharset\ UTF-8/AddDefaultCharset\ UTF-8/' /etc/apache2/conf-available/charset.conf
 RUN chmod 705 src/app/cgi-bin/iface.py
 RUN service apache2 restart
+
+
+RUN mkdir src/app/outputs
+RUN chmod 777 src/app/outputs
 
 EXPOSE 80
 
