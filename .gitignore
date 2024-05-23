@@ -166,3 +166,6 @@ data/public/gdas/*.grib2
 data/public/imerg/*
 data/private/*.csv
 data/public/.history
+data/public/old
+
+aedes_aegypti/*
