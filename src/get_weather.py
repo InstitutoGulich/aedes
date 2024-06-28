@@ -76,10 +76,10 @@ def getIMERGVersion(a_date):
     if(a_date<datetime.date(2019,5,1)):
         return '05'
     else:
-        return '06'
+        return '07'
 #TODO: take into account the utc time. ?
 def getFilenameForIMERG(a_date):
-    return '3B-DAY-L.MS.MRG.3IMERG.{year}{month:02}{day:02}-S000000-E235959.V{version}.nc4'.format(year=a_date.year,month=a_date.month,day=a_date.day,version=getIMERGVersion(a_date))
+    return '3B-DAY-L.MS.MRG.3IMERG.{year}{month:02}{day:02}-S000000-E235959.V{version}B.nc4'.format(year=a_date.year,month=a_date.month,day=a_date.day,version=getIMERGVersion(a_date))
 
 #https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+Python
 def downloadDataFromIMERG(start_date,end_date,folder):
@@ -108,7 +108,12 @@ def extractDailyDataFromIMERG(lat,lon,a_date):
     grp = nc.Dataset(nc_filename)
     lats = grp.variables['lat'][:]
     lons = grp.variables['lon'][:]
-    precipitations=grp.variables['precipitationCal']
+    if getIMERGVersion(a_date) == "07":
+        precipitation_variable = 'precipitation'
+    else:
+        precipitation_variable = 'precipitationCal'
+    precipitations=grp.variables[precipitation_variable]
+
     if(getIMERGVersion(a_date)=='05'):
         p=precipitations[(abs(lons-lon)).argmin(),(abs(lats-lat)).argmin()]
     else:#version 6
@@ -230,7 +235,10 @@ if(__name__ == '__main__'):
         lon=float(config_parser.get(location,'lon'))
         params=params+[[lat,lon,start_date,end_date,DATA_FOLDER+location+'.csv']]
 
-    p = mp.Pool(mp.cpu_count() -1)
-    vOpt=p.map(extractData, params)
+    for param in params:
+        extractData(param)
+
+    #p = mp.Pool(mp.cpu_count() -1)
+    #vOpt=p.map(extractData, params)
 
     joinFullWeather()
