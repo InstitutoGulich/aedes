@@ -226,7 +226,7 @@ if(__name__ == '__main__'):
     
     print(start_date)
     print(end_date)
-    downloadData(start_date,end_date)
+    #downloadData(start_date,end_date)
     config_parser = ConfigParser()
     config_parser.read('resources/get_weather.cfg')
     params=[]
@@ -235,8 +235,8 @@ if(__name__ == '__main__'):
         lon=float(config_parser.get(location,'lon'))
         params=params+[[lat,lon,start_date,end_date,DATA_FOLDER+location+'.csv']]
 
-    for param in params:
-        extractData(param)
+    #for param in params:
+    #    extractData(param)
 
     #p = mp.Pool(mp.cpu_count() -1)
     #vOpt=p.map(extractData, params)

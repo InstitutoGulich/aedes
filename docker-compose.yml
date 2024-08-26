@@ -22,6 +22,7 @@ services:
         dockerfile: web/Dockerfile
     container_name: dengue_web
     restart: always
+    image: dengue_web
     ports:
       - 8989:80
     volumes:

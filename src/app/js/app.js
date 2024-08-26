@@ -30,6 +30,7 @@ $(document).ready(function() {
     $('#population').html('Loading...');
     $('#population_II').html('Loading...');
     $('#weather').html('Loading...');
+    $('#download_button').removeClass('enable').addClass('disabled');
     var parameters=new Object();
     parameters.start_date=$('#start_date').val();
     parameters.end_date=$('#end_date').val();
