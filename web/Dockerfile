@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pip gcc g++ \
@@ -47,7 +47,7 @@ RUN chmod 777 src/app/outputs
 
 EXPOSE 80
 
-CMD /usr/sbin/apache2ctl -D FOREGROUND
+CMD ["/usr/sbin/apache2ctl","-D","FOREGROUND"]
 
 #docker build -t dengue .
 #docker run -d -p 8989:80 -v $(pwd)/data:/data --name=dengue_container dengue

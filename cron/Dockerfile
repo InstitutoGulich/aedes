@@ -29,4 +29,4 @@ RUN crontab /etc/cron.d/get_data-cron
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD cron && tail -f /var/log/cron.log
+CMD ["cron"]
