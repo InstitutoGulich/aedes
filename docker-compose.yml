@@ -16,6 +16,10 @@ services:
     container_name: dengue_cron
     volumes:
       - data:/root/data
+    healthcheck:
+      test: ["CMD", "test", "-d", "/root/data"]
+      interval: 10s
+      retries: 5
   web:
     build:
         context: .
@@ -27,6 +31,10 @@ services:
       - 8989:80
     volumes:
       - data:/root/data
+    healthcheck:
+      test: ["CMD", "test", "-d", "/root/data"]
+      interval: 10s
+      retries: 5
 volumes:
   data:
     driver: local
