@@ -7,7 +7,7 @@
 GPM IMERG Final Precipitation L3 1 day 0.1 degree x 0.1 degree V07 (GPM_3IMERGDF) at GES DISC
 
 - todo:
-    * use the [API](https://lpdaac.usgs.gov/tools/appeears/)
+    * use the [API](https://gpm-api.readthedocs.io/en/latest/index.html) or [Google Earth Engine](https://developers.google.com/earth-engine/datasets/catalog/NASA_GPM_L3_IMERG_V07#description)
 
 ## NCAR
 
