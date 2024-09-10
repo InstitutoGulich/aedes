@@ -22,7 +22,7 @@ NCEP GDAS/FNL 0.25 Degree Global Tropospheric Analyses and Forecast Grids
 
 Create data folder
 
-``bash
+```bash
 mkdir data
 ```
 
