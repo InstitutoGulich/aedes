@@ -578,10 +578,9 @@ def exportCSV(data):
         #write csv
         open('out/'+key+'.csv','w').write(csv)
 
-try:
-    from otero_precipitation_wrapper import Model as _Model
-except ImportError:
-    pass
+sys.path.append('src/') 
+from otero_precipitation_wrapper import Model as _Model
+
 import time
 import tempfile
 def runCpp():
