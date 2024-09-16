@@ -1,0 +1,19 @@
+name: aedes
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.8.18
+  - pybind11
+  - ipykernel
+  - plotly
+  - numpy
+  - scipy
+  - conda-forge::similaritymeasures
+  - conda-forge::matplotlib
+  - scikit-learn
+  - scikit-image
+  - folium
+  - moviepy
+  - pandas
+prefix: /home/msgro/MiniConda3/envs/aedes

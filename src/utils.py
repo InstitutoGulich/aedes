@@ -486,7 +486,8 @@ def showPlot(data,title='',xaxis_title='',yaxis_title='',scene=dict()):
 
 #plot maps
 def clamp(x):
-  return max(0, min(x, 255))
+    return max(0, min(x, 255))
+
 def RGBtoHex(r,g,b):
     return "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
 
@@ -562,13 +563,20 @@ def plotAnimated3D(data,date_range):
 
     fig = go.Figure(
         data=frames[0]['data'],
-        layout=go.Layout(
-            updatemenus=[dict(
-                type="buttons",
-                buttons=[dict(label="Play",
-                              method="animate",
-                              args=[None])])],
-                              ),
+        layout = go.Layout(
+            updatemenus = [
+                dict(
+                    type="buttons",
+                    buttons=[
+                        dict(
+                            label="Play",
+                            method="animate",
+                            args=[None]
+                        )
+                    ]
+                )
+            ],
+        ),
         frames=frames
     )
 
