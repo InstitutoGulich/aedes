@@ -5,10 +5,10 @@ import numpy as np
 from config import Configuration
 
 try:
-    from otero_precipitation_wrapper import Model as _Model
+    from otero_precipitation_wrapper import Model as _Model # type: ignore
 except ImportError:
-    os.system('g++ -std=c++17 -Wall -O3 -march=native -shared -fPIC -I/usr/include/python3.8 src/cpp/otero_precipitation_wrapper.cpp -o src/otero_precipitation_wrapper.so')
-    from otero_precipitation_wrapper import ModelWrapper as _Model
+    print("You need to compile the C++ code first")
+    raise
 
 class ParametersDecorator:
     def __init__(self,parameters):
@@ -39,4 +39,4 @@ class Model:
     def solveEquations(self):
         self._model.solveEquations()
         self.Y=np.array(self._model.Y)
-        return self.time_range,self.Y
+        return self.time_range, self.Y
