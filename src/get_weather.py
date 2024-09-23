@@ -54,11 +54,14 @@ def download_file(url, folder, filename):
     try:
         request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
+        if not response.headers['Content-Length']:
+            print(f"Content-Length doesn't exists for {filename}")
+            return
         total_size = int(response.headers['Content-Length'])
         downloaded_size = 0
         block_size = 8192
         with open(os.path.join(folder,filename), 'wb') as file:
-            with tqdm(total=total_size, unit='B', unit_scale=True) as progress_bar:
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'Downloading {filename}') as progress_bar:
                 while True:
                     buffer = response.read(block_size)
                     if not buffer:
@@ -68,6 +71,7 @@ def download_file(url, folder, filename):
                     progress_bar.update(len(buffer))
         print("Download complete!")
     except Exception as e:
+        print(f"Error downloading {filename} from {url}")
         print(e)
 ## END UTILS ##
 
@@ -147,14 +151,34 @@ def downloadDataFromGDAS(start_date,end_date,folder):
     for a_date in daterange(start_date,end_date):
         for a_time in ['00','06','12','18']:
             for a_forecast in ['00','03','06','09']:#a forcast time
-                filename=getFilenameForGDAS(a_date,a_time,f=a_forecast)
+                filename=getFilenameForGDAS(a_date,a_time,a_forecast)
                 
                 if check_file_exists(folder,filename):
                     continue
 
-                url='https://nomads.ncep.noaa.gov/cgi-bin/filter_gdas_0p25.pl?file=gdas.t{time}z.pgrb2.0p25.f0{forecast}&lev_2_m_above_ground=on&var_GUST=on&var_RH=on&var_TCDC=on&var_TMAX=on&var_TMIN=on&var_TMP=on&subregion=&leftlon=-76&rightlon=-52&toplat=-19&bottomlat=-56&dir=%2Fgdas.{year}{month:02}{day:02}%2F{time}%2Fatmos'.format(time=a_time,forecast=a_forecast,year=a_date.year,month=a_date.month,day=a_date.day)
+                base_url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gdas_0p25.pl'
+                opts = {
+                    'file':f'gdas.t{a_time}z.pgrb2.0p25.f0{a_forecast}',
+                    'lev_2_m_above_ground':'on',
+                    'var_GUST':'on',
+                    'var_RH':'on',
+                    'var_TCDC':'on',
+                    'var_TMAX':'on',
+                    'var_TMIN':'on',
+                    'var_TMP':'on',
+                    'subregion':'on',
+                    'leftlon':'-76',
+                    'rightlon':'-52',
+                    'toplat':'-19',
+                    'bottomlat':'-56',
+                    'dir':f'%2Fgdas.{a_date.year}{a_date.month:02d}{a_date.day:02d}%2F{a_time}%2Fatmos' # type: ignore
+                }
+
+                url = f'{base_url}?{"&".join([f"{k}={v}" for k,v in opts.items()])}'
+
                 download_file(url, folder, filename)
-                time.sleep(SLEEP)
+                time.sleep(1)
+
 
 def extractDailyDataFromGDAS(lat,lon,a_date,folder,FIELDS,typeOfLevel,f):
     TIMES=['00','06','12','18']
@@ -198,7 +222,7 @@ def downloadForecast():
             for a_time in ['00','06','12','18']:
                 url=forecast_types[key].format(year=start_date.year,month=start_date.month,day=start_date.day, f_year=a_date.year,f_month=a_date.month,f_day=a_date.day,time=a_time,f=f)
                 folder = key
-                filename = getFilenameForGDAS(a_date,a_time,f=f)
+                filename = getFilenameForGDAS(a_date,a_time,f)
                 download_file(url, folder, filename)
                 time.sleep(SLEEP)
 ## END FORECAST ##
@@ -209,7 +233,7 @@ def downloadData(start_date,end_date):
     logging.info('Downloading IMERG')
     downloadDataFromIMERG(start_date,end_date,IMERG_FOLDER)
     logging.info('Downloading forecast')
-    downloadForecast()
+    #downloadForecast()
 
 def extractHistoricData(lat,lon,start_date,end_date,out_filename):
     output=''

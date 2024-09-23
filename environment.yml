@@ -16,4 +16,7 @@ dependencies:
   - folium
   - moviepy
   - pandas
+  - pygrib
+  - netcdf4
+  - eigen
 prefix: /home/msgro/MiniConda3/envs/aedes

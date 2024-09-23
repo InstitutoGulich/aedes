@@ -1,4 +1,3 @@
-#based on
 import os
 import re
 import sys
@@ -6,13 +5,15 @@ import json
 import time
 import urllib
 import logging
-import getpass
 import tarfile
 import datetime
 import http.cookiejar
-from utils import daterange
 from get_weather import GDAS_FOLDER
 from configparser import ConfigParser
+
+def daterange(start_date, end_date):
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + datetime.timedelta(n)
 
 
 base='https://rda.ucar.edu/apps/'
@@ -24,7 +25,7 @@ control_template_filename='resources/ds083.3_control_file.template'
 loginurl='https://rda.ucar.edu/cgi-bin/login'
 FILENAME_FORMAT='gdas1.fnl0p25.%d%02d%02d%s.f%s.grib2'
 LOG_FILENAME='logs/get_weather.log'
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',filename=LOG_FILENAME,level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s', filename=LOG_FILENAME, level=logging.DEBUG)
 GDAS_TMP_FOLDER=GDAS_FOLDER+'/.tmp/'
 
 def init():
@@ -44,6 +45,7 @@ def submit(start_date,end_date):
         control_params[key]=value
 
     jsondata=json.dumps(control_params).encode('utf-8')
+    print(jsondata)
     response=urllib.request.urlopen(urllib.request.Request(base+'request',jsondata,{'Content-type': 'application/json'}) ).read().decode('ISO-8859-1')
     index=re.findall(r'Index[\ ]+:[\ ]+([0-9]+)',response.replace('\n',';'))[0]
     return index

@@ -27,7 +27,7 @@ conda env create --file environment.yml
 # Compiling C++ library
 
 ```bash
-g++ -std=c++17 -Wall -O3 -march=native -shared -fPIC -I$CONDA_PREFIX/include/python3.8 -I$CONDA_PREFIX/include/ src/cpp/otero_precipitation_wrapper.cpp -o src/otero_precipitation_wrapper.so
+g++ -std=c++17 -Wall -O3 -march=native -shared -fPIC -I$CONDA_PREFIX/include/python3.8 -I$CONDA_PREFIX/include/eigen3 -I$CONDA_PREFIX/include/ src/cpp/otero_precipitation_wrapper.cpp -o src/otero_precipitation_wrapper.so
 ```
 
 In order to test this library, you can compile main.cpp in src/cpp:
