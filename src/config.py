@@ -8,6 +8,7 @@ class Configuration:
         self.config_parser.readfp(open(filename))
     if(dict_config):
         for section in dict_config:
+            self.config_parser.add_section(section)
             for option in dict_config[section]:
                 values=dict_config[section][option]
                 if(isinstance(values,str)):
