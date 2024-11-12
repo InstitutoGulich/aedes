@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 DATA_FOLDER='data/public/'
 IMERG_FOLDER=DATA_FOLDER+'/imerg/'
-#IMERG_FOLDER='/media/msgro/b007d8ea-4b16-46f5-9697-66f6dea8591e/msgro/dengue/data/public/imerg/'
+#IMERG_FOLDER='/media/data/msgro/dengue/data/public/imerg/'
 GDAS_FOLDER=DATA_FOLDER+'/gdas/'
 #GDAS_FOLDER='/media/msgro/b007d8ea-4b16-46f5-9697-66f6dea8591e/msgro/dengue/data/public/gdas/new/'
 FORECAST_FOLDER=DATA_FOLDER+'/forecast/'
@@ -233,7 +233,7 @@ def downloadData(start_date,end_date):
     logging.info('Downloading IMERG')
     downloadDataFromIMERG(start_date,end_date,IMERG_FOLDER)
     logging.info('Downloading forecast')
-    #downloadForecast()
+    downloadForecast()
 
 def extractHistoricData(lat,lon,start_date,end_date,out_filename):
     output=''
