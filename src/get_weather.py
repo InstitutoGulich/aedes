@@ -12,6 +12,7 @@ import netCDF4 as nc
 import http.cookiejar
 from configparser import ConfigParser
 import multiprocessing as mp
+from tqdm import tqdm
 
 DATA_FOLDER='data/public/'
 IMERG_FOLDER=DATA_FOLDER+'/imerg/'
@@ -42,6 +43,32 @@ def getStartEndDates(filename):
     dates=[line.split(',')[0] for line in open(filename,'r').readlines()]
     dates=[date for date in dates if date]
     return datetime.datetime.strptime(dates[1], '%Y-%m-%d').date(),datetime.datetime.strptime(dates[-1], '%Y-%m-%d').date()
+
+def check_file_exists(folder,filename):
+    if(path.isfile(folder+filename)):
+        print(f"{filename} already exists")
+        return True
+    return False
+
+def download_file(url, folder, filename):
+    try:
+        request = urllib.request.Request(url)
+        response = urllib.request.urlopen(request)
+        total_size = int(response.headers['Content-Length'])
+        downloaded_size = 0
+        block_size = 8192
+        with open(os.path.join(folder,filename), 'wb') as file:
+            with tqdm(total=total_size, unit='B', unit_scale=True) as progress_bar:
+                while True:
+                    buffer = response.read(block_size)
+                    if not buffer:
+                        break
+                    downloaded_size += len(buffer)
+                    file.write(buffer)
+                    progress_bar.update(len(buffer))
+        print("Download complete!")
+    except Exception as e:
+        print(e)
 ## END UTILS ##
 
 ## IMERG ##
@@ -55,7 +82,13 @@ def getIMERGVersion(a_date):
 #TODO: take into account the utc time. ?
 
 def getFilenameForIMERG(a_date):
-    return '3B-DAY-L.MS.MRG.3IMERG.{year}{month:02}{day:02}-S000000-E235959.V{version}B.nc4'.format(year=a_date.year,month=a_date.month,day=a_date.day,version=getIMERGVersion(a_date))
+    version = getIMERGVersion(a_date)
+    if version == '07':
+        version += 'B'
+    year = a_date.year
+    month = a_date.month
+    day = a_date.day
+    return f'3B-DAY-L.MS.MRG.3IMERG.{year}{month:02d}{day:02d}-S000000-E235959.V{version}.nc4'
 
 #https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+Python
 def downloadDataFromIMERG(start_date,end_date,folder):
@@ -66,17 +99,21 @@ def downloadDataFromIMERG(start_date,end_date,folder):
     opener = urllib.request.build_opener(urllib.request.HTTPBasicAuthHandler(passman),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     urllib.request.install_opener(opener)
     for a_date in daterange(start_date,end_date):
-        filename=getFilenameForIMERG(a_date)
-        if(path.isfile(folder+'/'+filename)): continue#TODO: Also check filesize
-        url='https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGDL.{version}/{year}/{month:02}/{filename}'.format(year=a_date.year,month=a_date.month,filename=filename,version=getIMERGVersion(a_date))
-        #print(url)
-        if(getIMERGVersion(a_date)=='05'): url=url.replace('data','opendap')+'.nc4?precipitationCal[1040:1280][339:709],precipitationCal_cnt[1040:1280][339:709],lon[1040:1280],lat[339:709]'
-        try:
-            request = urllib.request.Request(url)
-            response = urllib.request.urlopen(request)
-            handle = open(folder+'/'+filename, 'wb').write(response.read())
-        except Exception as e:
-            print(e)
+        filename = getFilenameForIMERG(a_date)
+        
+        if check_file_exists(folder,filename):
+            continue
+
+        year = a_date.year
+        month = a_date.month
+        version = getIMERGVersion(a_date)
+        url = f'https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGDL.{version}/{year}/{month:02d}/{filename}'
+        
+        #version 5 is different
+        if(getIMERGVersion(a_date) == '05'): 
+            url = url.replace('data','opendap')+'.nc4?precipitationCal[1040:1280][339:709],precipitationCal_cnt[1040:1280][339:709],lon[1040:1280],lat[339:709]'
+
+        download_file(url, folder, filename)
         time.sleep(SLEEP)
 
 def extractDailyDataFromIMERG(lat,lon,a_date):
@@ -92,7 +129,7 @@ def extractDailyDataFromIMERG(lat,lon,a_date):
 
     if(getIMERGVersion(a_date)=='05'):
         p=precipitations[(abs(lons-lon)).argmin(),(abs(lats-lat)).argmin()]
-    else:#version 6
+    else:#version 6 and 7
         p=precipitations[0,(abs(lons-lon)).argmin(),(abs(lats-lat)).argmin()]#TODO:search documentation on the first index(time)
     grp.close()
     return p
@@ -100,21 +137,23 @@ def extractDailyDataFromIMERG(lat,lon,a_date):
 
 ## GDAS ##
 #TODO: take into account the utc time.
-def getFilenameForGDAS(a_date,a_time,f):
-    return 'gdas1.fnl0p25.{year}{month:02}{day:02}{time}.f{forecast}.grib2'.format(year=a_date.year,month=a_date.month,day=a_date.day,time=a_time,forecast=f)
+def getFilenameForGDAS(a_date,a_time,forecast):
+    year = a_date.year
+    month = a_date.month
+    day = a_date.day
+    return f'gdas1.fnl0p25.{year}{month:02d}{day:02d}{a_time}.f{forecast}.grib2'
 
 def downloadDataFromGDAS(start_date,end_date,folder):
     for a_date in daterange(start_date,end_date):
         for a_time in ['00','06','12','18']:
             for a_forecast in ['00','03','06','09']:#a forcast time
                 filename=getFilenameForGDAS(a_date,a_time,f=a_forecast)
-                if(path.isfile(folder+'/'+filename)): continue#TODO: Also check filesize
+                
+                if check_file_exists(folder,filename):
+                    continue
+
                 url='https://nomads.ncep.noaa.gov/cgi-bin/filter_gdas_0p25.pl?file=gdas.t{time}z.pgrb2.0p25.f0{forecast}&lev_2_m_above_ground=on&var_GUST=on&var_RH=on&var_TCDC=on&var_TMAX=on&var_TMIN=on&var_TMP=on&subregion=&leftlon=-76&rightlon=-52&toplat=-19&bottomlat=-56&dir=%2Fgdas.{year}{month:02}{day:02}%2F{time}%2Fatmos'.format(time=a_time,forecast=a_forecast,year=a_date.year,month=a_date.month,day=a_date.day)
-                #print(url)
-                try:
-                    open(folder+'/'+filename, 'wb').write(urllib.request.urlopen(url).read())
-                except Exception as e:
-                    print(e)
+                download_file(url, folder, filename)
                 time.sleep(SLEEP)
 
 def extractDailyDataFromGDAS(lat,lon,a_date,folder,FIELDS,typeOfLevel,f):
@@ -160,24 +199,7 @@ def downloadForecast():
                 url=forecast_types[key].format(year=start_date.year,month=start_date.month,day=start_date.day, f_year=a_date.year,f_month=a_date.month,f_day=a_date.day,time=a_time,f=f)
                 folder = key
                 filename = getFilenameForGDAS(a_date,a_time,f=f)
-                try:
-                    #print(filename)
-                    #open(folder+'/'+filename, 'wb').write(urllib.request.urlopen(url).read())
-                    response = urllib.request.urlopen(url)
-                    total_size = int(response.headers['Content-Length'])
-                    downloaded_size = 0
-                    block_size = 8192
-                    with open(os.path.join(folder,filename), 'wb') as file:
-                        while True:
-                            buffer = response.read(block_size)
-                            if not buffer:
-                                break
-                            downloaded_size += len(buffer)
-                            file.write(buffer)
-                            progress = downloaded_size / total_size * 100
-                            print(f"Download progress: {progress:.2f}%")
-                except Exception as e:
-                    print(e)
+                download_file(url, folder, filename)
                 time.sleep(SLEEP)
 ## END FORECAST ##
 
