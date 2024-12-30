@@ -22,9 +22,9 @@ GDAS_FOLDER=DATA_FOLDER+'/gdas/'
 FORECAST_FOLDER=DATA_FOLDER+'/forecast/'
 FORECAST_PGB_FOLDER=FORECAST_FOLDER+'/pgb/'
 FORECAST_FLX_FOLDER=FORECAST_FOLDER+'/flx/'
-FORECAST_RANGE=60#in days
+FORECAST_RANGE=1#in days
 HISTORY_FOLDER=DATA_FOLDER+'/.history/'
-SLEEP=1
+SLEEP=5
 LOG_FILENAME='logs/get_weather.log'
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',filename=LOG_FILENAME,level=logging.DEBUG)
@@ -54,14 +54,10 @@ def download_file(url, folder, filename):
     try:
         request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
-        if not response.headers['Content-Length']:
-            print(f"Content-Length doesn't exists for {filename}")
-            return
-        total_size = int(response.headers['Content-Length'])
         downloaded_size = 0
         block_size = 8192
         with open(os.path.join(folder,filename), 'wb') as file:
-            with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'Downloading {filename}') as progress_bar:
+            with tqdm(unit='B', unit_scale=True, desc=f'Downloading {filename}') as progress_bar:
                 while True:
                     buffer = response.read(block_size)
                     if not buffer:
@@ -69,10 +65,8 @@ def download_file(url, folder, filename):
                     downloaded_size += len(buffer)
                     file.write(buffer)
                     progress_bar.update(len(buffer))
-        print("Download complete!")
     except Exception as e:
-        print(f"Error downloading {filename} from {url}")
-        print(e)
+        print(f"Error downloading {filename} from {url}: {e}")
 ## END UTILS ##
 
 ## IMERG ##
@@ -237,28 +231,31 @@ def downloadData(start_date,end_date):
 
 def extractHistoricData(lat,lon,start_date,end_date,out_filename):
     output=''
+
     if(not os.path.isfile(out_filename)):
         output='Date,Minimum Temp (C),Mean Temperature (C),Maximum Temp (C),Rain (mm),Relative Humidity %,CloudCover,Mean Wind SpeedKm/h' + '\n'
         if os.path.isfile(DATA_FOLDER+'cordoba.csv'):
-            first_date,last_date=getStartEndDates(DATA_FOLDER+'cordoba.csv')
+            first_date, _ = getStartEndDates(DATA_FOLDER+'cordoba.csv')
         else:
-            first_date,last_date=start_date,end_date
-        start_date=min(start_date,first_date)#in case this is a new city, we start from the very beginning
+            first_date, _ = start_date, end_date
+        start_date = min(start_date, first_date)#in case this is a new city, we start from the very beginning
+
     for a_date in daterange(start_date,end_date):
         FIELDS=['Minimum temperature','Maximum temperature','Relative humidity']
         #to validate that the +360 was ok: 1) gdal_translate a grib to a tif and open qgis with google map as background. 2) use https://www.latlong.net/Show-Latitude-Longitude.html 3)explore.py
-        fields_values=extractDailyDataFromGDAS(lat,lon+360.,a_date,GDAS_FOLDER,FIELDS,typeOfLevel='heightAboveGround',f='03')
+        fields_values = extractDailyDataFromGDAS(lat,lon+360.,a_date,GDAS_FOLDER,FIELDS,typeOfLevel='heightAboveGround',f='03')
         try:
             min_T,max_T=np.min(fields_values[FIELDS[0]]),np.max(fields_values[FIELDS[1]])
             mean_T=(min_T+max_T)/2.
             mean_rh=(np.min(fields_values[FIELDS[2]])+np.max(fields_values[FIELDS[2]]))/2.
-        except:
-            print('Error in %s'%a_date)
+        except Exception as e:
+            print(f'Error in {a_date} for {out_filename}: {e}')
             min_T = -99.99; max_T = -99.99; mean_T = -99.99; mean_rh = -99.99
             continue
 
-        precipitation=extractDailyDataFromIMERG(lat,lon,a_date)
-        output+=a_date.strftime('%Y-%m-%d')+', '+', '.join([str(min_T),str(mean_T),str(max_T),str(precipitation),str(mean_rh) ]) + ',,'+'\n'
+        precipitation = extractDailyDataFromIMERG(lat,lon,a_date)
+        output += a_date.strftime('%Y-%m-%d')+', '+', '.join([str(min_T),str(mean_T),str(max_T),str(precipitation),str(mean_rh) ]) + ',,'+'\n'
+
     open(out_filename,'a').write(output)
 
 def extractForecastData(lat,lon,out_filename):
@@ -278,7 +275,7 @@ def extractForecastData(lat,lon,out_filename):
     open(out_filename.replace('.csv','.forecast.csv'),'w').write(output)
 
 def extractData(params):
-    lat,lon,start_date,end_date,out_filename=params
+    lat, lon, start_date, end_date, out_filename = params
     logging.info('Extracting data to %s'%out_filename)
     extractHistoricData(lat,lon,start_date,end_date,out_filename)
     extractForecastData(lat,lon,out_filename)
@@ -296,13 +293,13 @@ if(__name__ == '__main__'):
     print(f"Begin weather update: {datetime.datetime.now()}")
 
     FORMAT='%Y-%m-%d'
-    start_date,end_date=None,None
+    start_date, end_date = None,None
     if(len(sys.argv)>2):
-        start_date,end_date= datetime.datetime.strptime(sys.argv[1],FORMAT).date(),datetime.datetime.strptime(sys.argv[2],FORMAT).date()
+        start_date, end_date = datetime.datetime.strptime(sys.argv[1],FORMAT).date(),datetime.datetime.strptime(sys.argv[2],FORMAT).date()
     elif(len(sys.argv)==1):
-        today=datetime.date.today()
-        first_date,last_date=getStartEndDates(DATA_FOLDER+'cordoba.csv')#in case the script failed, we start from the last good run.
-        start_date,end_date= last_date+datetime.timedelta(1),today
+        today = datetime.date.today()
+        first_date, last_date=getStartEndDates(DATA_FOLDER+'cordoba.csv')#in case the script failed, we start from the last good run.
+        start_date, end_date= last_date+datetime.timedelta(1),today
     
     print(f"Range date: {start_date} - {end_date}")
     downloadData(start_date,end_date)
@@ -313,9 +310,6 @@ if(__name__ == '__main__'):
         lat=float(config_parser.get(location,'lat'))
         lon=float(config_parser.get(location,'lon'))
         params=params+[[lat,lon,start_date,end_date,DATA_FOLDER+location+'.csv']]
-
-    #for param in params:
-    #    extractData(param)
 
     p = mp.Pool(mp.cpu_count() -1)
     vOpt=p.map(extractData, params)
