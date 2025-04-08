@@ -121,18 +121,18 @@ def rkf_solve(dYdt,Y0,time_range,args=(),tol=50.,hmin=0.001,hmax=0.05):
 
 from scipy.integrate import ode
 def scipy_solve(_dYdt,Y0,time_range,name,kwargs,args=()):
-	def dYdt(t,Y): return np.array(_dYdt(Y,t,*args))#decorate the function to return an np array and swap args.
-	r = ode(dYdt).set_integrator(name,**kwargs)
-	r.set_initial_value(Y0, time_range[0])
-	Y=np.zeros([len(time_range),len(Y0)])
+    def dYdt(t,Y): return np.array(_dYdt(Y,t,*args))#decorate the function to return an np array and swap args.
+    r = ode(dYdt).set_integrator(name,**kwargs)
+    r.set_initial_value(Y0, time_range[0])
+    Y=np.zeros([len(time_range),len(Y0)])
 
-	for i,t in enumerate(time_range[:-1]):
-	    h=time_range[i+1]-time_range[i]
-	    Y[i+1]=r.integrate(r.t+h)
-	    if(not r.successful):
-	        break
+    for i,t in enumerate(time_range[:-1]):
+        h=time_range[i+1]-time_range[i]
+        Y[i+1]=r.integrate(r.t+h)
+        if(not r.successful):
+            break
 
-	return Y
+    return Y
 
 def diff_eqs(Y,t):
 	b = 0.25

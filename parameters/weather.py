@@ -20,7 +20,8 @@ class Weather:
     T = None
     RH = None
     def __init__(self, filename,start_date,end_date):
-        precipitations = utils.getPrecipitationsFromCsv(filename,start_date,end_date)
-        self.p = self.getAsLambdaFunction(self.aps,precipitations)
+        #precipitations = utils.getPrecipitationsFromCsv(filename,start_date,end_date)
+        #self.p = self.getAsLambdaFunction(self.aps,precipitations)
+        self.p = interpolate.InterpolatedUnivariateSpline(range(0,(end_date - start_date).days),utils.getPrecipitationsFromCsv(filename,start_date,end_date))
         self.T = interpolate.InterpolatedUnivariateSpline(range(0,(end_date - start_date).days),utils.getAverageTemperaturesFromCsv(filename,start_date,end_date))
         self.RH = interpolate.InterpolatedUnivariateSpline(range(0,(end_date - start_date).days),utils.getRelativeHumidityFromCsv(filename,start_date,end_date))

@@ -50,7 +50,7 @@ def main(confFile=None,outputFile=None):
     t2 = time.time()
     print('Elapsed time: ', t2-t1)
 
-    indexOf=lambda t: (np.abs(time_range-t)).argmin()
+    indexOf = lambda t: (np.abs(time_range-t)).argmin()
 
     start_datetime = datetime.datetime.strptime(configuration.getString('simulation','start_date'),'%Y-%m-%d')
     end_datetime = datetime.datetime.strptime(configuration.getString('simulation','end_date'),'%Y-%m-%d')

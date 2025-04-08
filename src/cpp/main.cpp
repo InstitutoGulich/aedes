@@ -9,7 +9,7 @@
 #include "otero_precipitation.h"
 
 int main(){
-  Model model=Model(Configuration("resources/otero_precipitation.cfg"));
+  Model model=Model(Configuration("resources/example.cfg"));
   std::vector<tensor> Y;
   std::vector<scalar> time_range;
   std::tie(time_range,Y)=model.solveEquations();

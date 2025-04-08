@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 import plotly.graph_objs as go
-from equations import diff_eqs,ovsp,vR_D
+from equations import diff_eqs,vR_D
 from equation_fitter import getConfiguration
 #from collections import OrderedDict
 import plotly.offline as ply
