@@ -37,6 +37,15 @@ services:
       interval: 10s
       retries: 5
 
+  autoheal:
+    image: willfarrell/autoheal
+    container_name: docker_autoheal
+    restart: always
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all  # or set to a specific label
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
   data:
     driver: local
